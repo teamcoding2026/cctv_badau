@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CCTV Vehicle Log</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand-area">
+          <button class="menu-button" type="button" aria-label="Menu">☰</button>
+          <div class="brand-mark" aria-hidden="true">▱</div>
+          <div class="brand-text">
+            <strong>satu aset</strong>
+            <span>cctv kantor</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="clock-wrap">
+            <span class="clock-dot" aria-hidden="true"></span>
+            <strong id="currentTime">--:--</strong>
+          </div>
+          <button class="clock-in" type="button">Monitoring</button>
+          <button class="avatar-button" type="button" aria-label="Profil"></button>
+          <button class="header-icon" id="refreshButton" type="button" title="Refresh data">↻</button>
+        </div>
+      </header>
+
+      <nav class="top-nav" aria-label="Navigasi modul">
+        <a class="active" href="#">Beranda</a>
+        <a href="#">Kamera</a>
+        <a href="#">Kendaraan</a>
+        <a href="#">Laporan</a>
+        <a href="#">Export</a>
+        <a href="#">Pengaturan</a>
+      </nav>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="user-card">
+            <strong>Pengelola Aset</strong>
+            <span>CCTV Kantor</span>
+            <small>Monitoring kendaraan masuk dan keluar</small>
+          </section>
+
+          <nav class="side-nav" aria-label="Navigasi halaman">
+            <a class="active" href="#"><span>⌂</span> Beranda</a>
+            <a href="#"><span>▣</span> CCTV</a>
+            <a href="#"><span>▤</span> Log Kendaraan</a>
+            <a href="#"><span>?</span> Bantuan</a>
+          </nav>
+        </aside>
+
+        <main class="content">
+          <section class="content-card">
+            <div class="page-title">
+              <h1>Laporan Kendaraan CCTV</h1>
+            </div>
+
+            <div class="alert hidden" id="errorBox"></div>
+
+            <section class="filter-line">
+              <label>
+                Periode
+                <select aria-label="Periode laporan">
+                  <option>Hari ini</option>
+                  <option>Minggu ini</option>
+                  <option>Bulan ini</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="summary-grid">
+              <article class="metric">
+                <span class="metric-label">Total pantauan</span>
+                <strong id="totalCount">0</strong>
+              </article>
+              <article class="metric">
+                <span class="metric-label">Kendaraan masuk</span>
+                <strong id="entryCount">0</strong>
+              </article>
+              <article class="metric">
+                <span class="metric-label">Kendaraan keluar</span>
+                <strong id="exitCount">0</strong>
+              </article>
+            </section>
+
+            <section class="snapshot-preview hidden" id="snapshotPreview">
+              <div class="snapshot-meta">
+                <p class="section-kicker">Hasil kamera</p>
+                <h2 id="snapshotTitle">Snapshot CCTV</h2>
+              </div>
+              <a id="snapshotLink" href="#" target="_blank">
+                <img id="snapshotImage" alt="Hasil snapshot kamera" />
+              </a>
+            </section>
+
+            <section class="workspace">
+              <form class="panel camera-form" id="cameraForm">
+                <div class="panel-title">
+                  <span class="panel-icon">▦</span>
+                  <h2>Tambah CCTV</h2>
+                </div>
+
+                <label>
+                  Nama titik kamera
+                  <input id="cameraName" value="Gerbang Depan" required />
+                </label>
+
+                <label>
+                  RTSP stream URL / Webcam index
+                  <input id="streamUrl" value="0" placeholder="Isi 0 untuk webcam utama, atau rtsp://..." required />
+                </label>
+
+                <div class="segmented" role="group" aria-label="Arah kamera">
+                  <button type="button" class="selected" data-direction="entry">Masuk</button>
+                  <button type="button" data-direction="exit">Keluar</button>
+                </div>
+
+                <button class="primary">Simpan Kamera</button>
+              </form>
+
+              <section class="panel">
+                <div class="panel-title">
+                  <span class="panel-icon">▣</span>
+                  <h2>Daftar CCTV</h2>
+                </div>
+                <div class="camera-list" id="cameraList">
+                  <p class="empty">Belum ada kamera.</p>
+                </div>
+              </section>
+            </section>
+
+            <section class="panel events-panel">
+              <div class="panel-title panel-title-between">
+                <div class="title-left">
+                  <span class="status-pill">DATA</span>
+                  <h2>Log Kendaraan</h2>
+                </div>
+                <a class="download-button" href="/api/events/export.csv" title="Unduh data Excel">
+                  <span class="download-icon" aria-hidden="true"></span>
+                  <span>Unduh Excel</span>
+                </a>
+              </div>
+
+              <div class="event-table">
+                <div class="event-header">
+                  <span>Waktu</span>
+                  <span>CCTV</span>
+                  <span>Arah</span>
+                  <span>Nomor Polisi</span>
+                  <span>Foto</span>
+                </div>
+                <div id="eventList">
+                  <p class="empty">Belum ada kendaraan tercatat.</p>
+                </div>
+              </div>
+            </section>
+          </section>
+        </main>
+      </div>
+
+      <footer class="app-footer">
+        <span>Powered By Sistem Aset Kantor</span>
+        <strong>Versi 1.0</strong>
+        <span>Digital Monitoring CCTV</span>
+      </footer>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
