@@ -7,7 +7,39 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <section class="login-screen" id="loginScreen">
+      <div class="login-card">
+        <div class="login-brand">
+          <div class="brand-mark" aria-hidden="true">SA</div>
+          <div class="brand-text">
+            <strong>satu aset</strong>
+            <span>cctv kantor</span>
+          </div>
+        </div>
+
+        <div class="login-copy">
+          <h1>Login Admin</h1>
+          <p>Masuk untuk mengelola kamera, snapshot, dan log kendaraan.</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+          <label>
+            Username
+            <input id="loginUsername" autocomplete="username" value="admin" required />
+          </label>
+
+          <label>
+            Password
+            <input id="loginPassword" type="password" autocomplete="current-password" required />
+          </label>
+
+          <div class="login-error hidden" id="loginError"></div>
+          <button class="primary" type="submit">Masuk</button>
+        </form>
+      </div>
+    </section>
+
+    <div class="app-shell hidden" id="appShell">
       <header class="app-header">
         <div class="brand-area">
           <button class="menu-button" type="button" aria-label="Menu">☰</button>
@@ -26,6 +58,7 @@
           <button class="clock-in" type="button">Monitoring</button>
           <button class="avatar-button" type="button" aria-label="Profil"></button>
           <button class="header-icon" id="refreshButton" type="button" title="Refresh data">↻</button>
+          <button class="logout-button" id="logoutButton" type="button">Keluar</button>
         </div>
       </header>
 

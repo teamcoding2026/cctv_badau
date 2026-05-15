@@ -5,7 +5,19 @@ const state = {
   lastSnapshot: null,
 };
 
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "admin123";
+const LOGIN_KEY = "cctvAdminLoggedIn";
+let refreshTimer = null;
+
 const elements = {
+  loginScreen: document.querySelector("#loginScreen"),
+  appShell: document.querySelector("#appShell"),
+  loginForm: document.querySelector("#loginForm"),
+  loginUsername: document.querySelector("#loginUsername"),
+  loginPassword: document.querySelector("#loginPassword"),
+  loginError: document.querySelector("#loginError"),
+  logoutButton: document.querySelector("#logoutButton"),
   errorBox: document.querySelector("#errorBox"),
   refreshButton: document.querySelector("#refreshButton"),
   currentTime: document.querySelector("#currentTime"),
@@ -47,7 +59,48 @@ function clearError() {
   elements.errorBox.classList.add("hidden");
 }
 
+function isLoggedIn() {
+  return sessionStorage.getItem(LOGIN_KEY) === "true";
+}
+
+function showLoginError(message) {
+  elements.loginError.textContent = message;
+  elements.loginError.classList.remove("hidden");
+}
+
+function clearLoginError() {
+  elements.loginError.textContent = "";
+  elements.loginError.classList.add("hidden");
+}
+
+function startRefreshTimer() {
+  if (refreshTimer !== null) return;
+  refreshTimer = window.setInterval(refresh, 5000);
+}
+
+function stopRefreshTimer() {
+  if (refreshTimer === null) return;
+  window.clearInterval(refreshTimer);
+  refreshTimer = null;
+}
+
+function setLoginState(loggedIn) {
+  elements.loginScreen.classList.toggle("hidden", loggedIn);
+  elements.appShell.classList.toggle("hidden", !loggedIn);
+
+  if (loggedIn) {
+    refresh();
+    startRefreshTimer();
+  } else {
+    stopRefreshTimer();
+    clearLoginError();
+    elements.loginPassword.value = "";
+    elements.loginUsername.focus();
+  }
+}
+
 async function refresh() {
+  if (!isLoggedIn()) return;
   clearError();
   try {
     const [cameras, events] = await Promise.all([request("/api/cameras"), request("/api/events")]);
@@ -192,6 +245,30 @@ async function toggleCamera(cameraId) {
   }
 }
 
+function handleLogin(event) {
+  event.preventDefault();
+  clearLoginError();
+
+  const username = elements.loginUsername.value.trim();
+  const password = elements.loginPassword.value;
+
+  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    showLoginError("Username atau password admin belum sesuai.");
+    return;
+  }
+
+  sessionStorage.setItem(LOGIN_KEY, "true");
+  setLoginState(true);
+}
+
+function logout() {
+  sessionStorage.removeItem(LOGIN_KEY);
+  state.cameras = [];
+  state.events = [];
+  state.lastSnapshot = null;
+  setLoginState(false);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -222,6 +299,8 @@ elements.cameraList.addEventListener("click", (event) => {
 
 elements.cameraForm.addEventListener("submit", saveCamera);
 elements.refreshButton.addEventListener("click", refresh);
+elements.loginForm.addEventListener("submit", handleLogin);
+elements.logoutButton.addEventListener("click", logout);
 
 function updateClock() {
   if (!elements.currentTime) return;
@@ -233,5 +312,4 @@ function updateClock() {
 
 updateClock();
 window.setInterval(updateClock, 1000);
-refresh();
-window.setInterval(refresh, 5000);
+setLoginState(isLoggedIn());
