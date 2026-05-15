@@ -136,7 +136,7 @@
               <form class="panel camera-form" id="cameraForm">
                 <div class="panel-title">
                   <span class="panel-icon">▦</span>
-                  <h2>Tambah CCTV</h2>
+                  <h2 id="cameraFormTitle">Tambah CCTV</h2>
                 </div>
 
                 <label>
@@ -154,7 +154,8 @@
                   <button type="button" data-direction="exit">Keluar</button>
                 </div>
 
-                <button class="primary">Simpan Kamera</button>
+                <button class="primary" id="cameraSubmitButton">Simpan Kamera</button>
+                <button class="secondary hidden" id="cancelEditButton" type="button">Batal Edit</button>
               </form>
 
               <section class="panel">
@@ -204,6 +205,6 @@
       </footer>
     </div>
 
-    <script src="/app.js?v=20260515-login"></script>
+    <script src="/app.js?v=20260515-crud-camera"></script>
   </body>
 </html>

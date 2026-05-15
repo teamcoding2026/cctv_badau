@@ -500,9 +500,11 @@ input {
 }
 
 .primary,
+.secondary,
 .icon-button,
 .download-button,
-.text-button {
+.text-button,
+.danger-button {
   border: 0;
   cursor: pointer;
 }
@@ -512,6 +514,15 @@ input {
   border-radius: 23px;
   color: #ffffff;
   background: #0078c8;
+  font-weight: 800;
+}
+
+.secondary {
+  min-height: 42px;
+  border: 1px solid #d4dfec;
+  border-radius: 23px;
+  color: #1f2f46;
+  background: #ffffff;
   font-weight: 800;
 }
 
@@ -555,7 +566,8 @@ input {
 }
 
 .icon-button,
-.text-button {
+.text-button,
+.danger-button {
   min-height: 40px;
   border: 1px solid #d4dfec;
   border-radius: 21px;
@@ -574,6 +586,13 @@ input {
 .text-button {
   padding: 0 16px;
   color: #006ecb;
+}
+
+.danger-button {
+  padding: 0 16px;
+  color: #a52323;
+  background: #fff5f5;
+  border-color: #f3c4c4;
 }
 
 .events-panel {

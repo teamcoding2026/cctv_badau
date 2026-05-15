@@ -9,6 +9,10 @@ class CameraCreate(BaseModel):
     direction: str = Field(pattern="^(entry|exit)$")
 
 
+class CameraUpdate(CameraCreate):
+    pass
+
+
 class CameraOut(BaseModel):
     id: int
     name: str

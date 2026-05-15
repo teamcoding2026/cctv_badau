@@ -3,6 +3,7 @@ const state = {
   events: [],
   direction: "entry",
   lastSnapshot: null,
+  editingCameraId: null,
 };
 
 const ADMIN_USERNAME = "admin";
@@ -23,6 +24,9 @@ const elements = {
   refreshButton: document.querySelector("#refreshButton"),
   currentTime: document.querySelector("#currentTime"),
   cameraForm: document.querySelector("#cameraForm"),
+  cameraFormTitle: document.querySelector("#cameraFormTitle"),
+  cameraSubmitButton: document.querySelector("#cameraSubmitButton"),
+  cancelEditButton: document.querySelector("#cancelEditButton"),
   cameraName: document.querySelector("#cameraName"),
   streamUrl: document.querySelector("#streamUrl"),
   cameraList: document.querySelector("#cameraList"),
@@ -154,9 +158,11 @@ function renderCameras() {
           </div>
           <div class="camera-actions">
             <button type="button" class="text-button" data-snapshot-camera="${camera.id}" title="Ambil foto dan baca plat">Foto & Baca Plat</button>
+            <button type="button" class="text-button" data-edit-camera="${camera.id}" title="Edit data CCTV">Edit</button>
             <button type="button" class="icon-button" data-toggle-camera="${camera.id}" title="${camera.status === "active" ? "Stop CCTV" : "Start CCTV"}">
               ${camera.status === "active" ? "Stop" : "Play"}
             </button>
+            <button type="button" class="danger-button" data-delete-camera="${camera.id}" title="Hapus CCTV">Hapus</button>
           </div>
         </article>
       `,
@@ -206,18 +212,73 @@ async function saveCamera(event) {
   clearStatus();
 
   try {
-    await request("/api/cameras", {
-      method: "POST",
+    const isEditing = state.editingCameraId !== null;
+    await request(isEditing ? `/api/cameras/${state.editingCameraId}` : "/api/cameras", {
+      method: isEditing ? "PUT" : "POST",
       body: JSON.stringify({
-        name: elements.cameraName.value,
-        stream_url: elements.streamUrl.value,
+        name: elements.cameraName.value.trim(),
+        stream_url: elements.streamUrl.value.trim(),
         direction: state.direction,
       }),
     });
+    resetCameraForm();
     await refresh();
-    showStatus("CCTV baru berhasil ditambahkan ke daftar.");
+    showStatus(isEditing ? "Data CCTV berhasil diperbarui." : "CCTV baru berhasil ditambahkan ke daftar.");
   } catch (error) {
     showError(error.message || "Gagal menyimpan kamera");
+  }
+}
+
+function editCamera(cameraId) {
+  const camera = state.cameras.find((item) => item.id === cameraId);
+  if (!camera) return;
+
+  clearError();
+  clearStatus();
+  state.editingCameraId = camera.id;
+  state.direction = camera.direction;
+  elements.cameraName.value = camera.name;
+  elements.streamUrl.value = camera.stream_url;
+  elements.cameraFormTitle.textContent = "Edit CCTV";
+  elements.cameraSubmitButton.textContent = "Simpan Perubahan";
+  elements.cancelEditButton.classList.remove("hidden");
+  elements.directionButtons.forEach((button) => {
+    button.classList.toggle("selected", button.dataset.direction === camera.direction);
+  });
+  elements.cameraName.focus();
+}
+
+function resetCameraForm() {
+  state.editingCameraId = null;
+  state.direction = "entry";
+  elements.cameraFormTitle.textContent = "Tambah CCTV";
+  elements.cameraSubmitButton.textContent = "Simpan Kamera";
+  elements.cancelEditButton.classList.add("hidden");
+  elements.cameraName.value = "Gerbang Depan";
+  elements.streamUrl.value = "0";
+  elements.directionButtons.forEach((button) => {
+    button.classList.toggle("selected", button.dataset.direction === "entry");
+  });
+}
+
+async function deleteCamera(cameraId) {
+  const camera = state.cameras.find((item) => item.id === cameraId);
+  if (!camera) return;
+
+  const confirmed = window.confirm(`Hapus CCTV "${camera.name}" dari daftar? Log kendaraan lama tetap tersimpan.`);
+  if (!confirmed) return;
+
+  clearError();
+  clearStatus();
+  try {
+    await request(`/api/cameras/${cameraId}`, { method: "DELETE" });
+    if (state.editingCameraId === cameraId) {
+      resetCameraForm();
+    }
+    await refresh();
+    showStatus("CCTV berhasil dihapus dari daftar.");
+  } catch (error) {
+    showError(error.message || "Gagal menghapus CCTV");
   }
 }
 
@@ -308,12 +369,25 @@ elements.cameraList.addEventListener("click", (event) => {
     return;
   }
 
-  const button = event.target.closest("[data-toggle-camera]");
-  if (!button) return;
-  toggleCamera(Number(button.dataset.toggleCamera));
+  const editButton = event.target.closest("[data-edit-camera]");
+  if (editButton) {
+    editCamera(Number(editButton.dataset.editCamera));
+    return;
+  }
+
+  const deleteButton = event.target.closest("[data-delete-camera]");
+  if (deleteButton) {
+    deleteCamera(Number(deleteButton.dataset.deleteCamera));
+    return;
+  }
+
+  const toggleButton = event.target.closest("[data-toggle-camera]");
+  if (!toggleButton) return;
+  toggleCamera(Number(toggleButton.dataset.toggleCamera));
 });
 
 elements.cameraForm.addEventListener("submit", saveCamera);
+elements.cancelEditButton.addEventListener("click", resetCameraForm);
 elements.refreshButton.addEventListener("click", refresh);
 elements.loginForm.addEventListener("submit", handleLogin);
 elements.logoutButton.addEventListener("click", logout);

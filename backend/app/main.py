@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
 from .models import Camera, VehicleEvent, local_now
-from .schemas import CameraCreate, CameraOut, SnapshotOut, VehicleEventOut
+from .schemas import CameraCreate, CameraOut, CameraUpdate, SnapshotOut, VehicleEventOut
 from .services.camera import SNAPSHOT_DIR, worker_registry
 
 Base.metadata.create_all(bind=engine)
@@ -47,6 +47,41 @@ def create_camera(payload: CameraCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(camera)
     return camera
+
+
+@app.put("/api/cameras/{camera_id}", response_model=CameraOut)
+def update_camera(camera_id: int, payload: CameraUpdate, db: Session = Depends(get_db)):
+    camera = db.get(Camera, camera_id)
+    if camera is None:
+        raise HTTPException(status_code=404, detail="Camera not found")
+
+    was_active = camera.status == "active"
+    if was_active:
+        worker_registry.stop(camera_id)
+
+    camera.name = payload.name
+    camera.stream_url = payload.stream_url
+    camera.direction = payload.direction
+    db.commit()
+    db.refresh(camera)
+
+    if was_active:
+        worker_registry.start(camera)
+        db.refresh(camera)
+
+    return camera
+
+
+@app.delete("/api/cameras/{camera_id}")
+def delete_camera(camera_id: int, db: Session = Depends(get_db)):
+    camera = db.get(Camera, camera_id)
+    if camera is None:
+        raise HTTPException(status_code=404, detail="Camera not found")
+
+    worker_registry.stop(camera_id)
+    db.delete(camera)
+    db.commit()
+    return {"deleted": True}
 
 
 @app.post("/api/cameras/{camera_id}/start", response_model=CameraOut)
