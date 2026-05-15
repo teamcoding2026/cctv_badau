@@ -250,7 +250,7 @@ function handleLogin(event) {
   clearLoginError();
 
   const username = elements.loginUsername.value.trim();
-  const password = elements.loginPassword.value;
+  const password = elements.loginPassword.value.trim();
 
   if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
     showLoginError("Username atau password admin belum sesuai.");
