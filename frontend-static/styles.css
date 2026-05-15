@@ -678,6 +678,16 @@ input {
   background: #fff2ed;
 }
 
+.notice {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #a7d6b4;
+  border-radius: 8px;
+  color: #155b2f;
+  background: #eefaf1;
+  font-weight: 700;
+}
+
 .hidden {
   display: none !important;
 }

@@ -19,6 +19,7 @@ const elements = {
   loginError: document.querySelector("#loginError"),
   logoutButton: document.querySelector("#logoutButton"),
   errorBox: document.querySelector("#errorBox"),
+  statusBox: document.querySelector("#statusBox"),
   refreshButton: document.querySelector("#refreshButton"),
   currentTime: document.querySelector("#currentTime"),
   cameraForm: document.querySelector("#cameraForm"),
@@ -57,6 +58,19 @@ function showError(message) {
 function clearError() {
   elements.errorBox.textContent = "";
   elements.errorBox.classList.add("hidden");
+}
+
+function showStatus(message) {
+  elements.statusBox.textContent = message;
+  elements.statusBox.classList.remove("hidden");
+  window.setTimeout(() => {
+    elements.statusBox.classList.add("hidden");
+  }, 3500);
+}
+
+function clearStatus() {
+  elements.statusBox.textContent = "";
+  elements.statusBox.classList.add("hidden");
 }
 
 function isLoggedIn() {
@@ -189,6 +203,7 @@ function renderSnapshot() {
 async function saveCamera(event) {
   event.preventDefault();
   clearError();
+  clearStatus();
 
   try {
     await request("/api/cameras", {
@@ -200,6 +215,7 @@ async function saveCamera(event) {
       }),
     });
     await refresh();
+    showStatus("CCTV baru berhasil ditambahkan ke daftar.");
   } catch (error) {
     showError(error.message || "Gagal menyimpan kamera");
   }
